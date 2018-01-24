@@ -8,5 +8,7 @@
     switch ($request[1]){
         default:
             header("HTTP/1.0 404 Not Found");
+            exit();
             break;
+            
     }

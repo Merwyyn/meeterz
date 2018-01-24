@@ -15,7 +15,7 @@
     /** 
         YOU CAN EDIT NOW
     **/
-    $database_config=["host" => 'localhost', "user" => 'root_admin', "password" => 'Pp6_t6h7', "database" => 'waapi'];
+    $database_config=["host" => 'localhost', "user" => 'dr166627', "password" => 'bTrm5&45', "database" => 'meeterz_dev2'];
     $debug=ON;
     $base_web=ROOT_DIR."/../";
     $base_web_view=$base_web."../api2.meeterz.waapi.fr/";
