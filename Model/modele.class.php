@@ -47,7 +47,7 @@
         * @return int
         */
         public function lastInsert(){
-            return $this->db->lastInsertId;
+            return $this->_db->lastInsertId();
         }
         public function getDb() {
             global $database_config;

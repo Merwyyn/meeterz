@@ -1,13 +1,13 @@
 <?php
     class Account extends Modele {
-        private $_idUser;
-        private $_lastName;
-        private $_firstName;
-        private $_admin;
-        private $_birthDate;
-        private $_nationality;
+        private $_id;
         private $_email;
         private $_password;
+        private $_lastName;
+        private $_firstName;
+        private $_access_level;
+        private $_birthDate;
+        private $_nationality;    
         private $_address;
         private $_city;
         private $_postalCode;
@@ -16,17 +16,22 @@
         private $_facebook;
         private $_instagram;
         private $_twitter;
-        private $_googlep;
+        private $_google;
         private $_howDoYouKnow;
         private $_occupation;
         private $_children;
         private $_picture;
         private $_registrationDate;
+        private $_loginTime;
+        private $_logoutTime;
         
-        const SELECT = 'SELECT * FROM user WHERE idUser=?';
-        const EXIST_LOGIN = 'SELECT idUser FROM user WHERE email=? AND password=?';
-        const EXIST_LOGIN_NETWORK = 'SELECT idUser FROM user WHERE %NETWORK%=?';
-        public function __construct($idUser=NULL, $lastName=NULL, $firstName=NULL, $admin=NULL, $birthDate=NULL, $nationality=NULL, $email=NULL, $password=NULL, $address=NULL, $city=NULL, $postalCode=NULL, $country=NULL, $cellNumber=NULL, $facebook=NULL, $instagram=NULL, $twitter=NULL, $googlep=NULL, $howDoYouKnow=NULL, $occupation=NULL, $children=NULL, $picture=NULL, $registrationDate = NULL){
+        const SELECT = 'SELECT * FROM user WHERE id=?';
+        const EXIST_LOGIN = 'SELECT id FROM user WHERE email=? AND password=?';
+        const EXIST_LOGIN_NETWORK = 'SELECT id FROM user WHERE %NETWORK%=?';
+        const EXIST_MAIL = 'SELECT COUNT(*) FROM user WHERE email=?';
+        const INSERT = 'INSERT INTO user (email, password, registrationDate) VALUES (?, ?, ?)';
+        const UPDATE_LOGIN = 'UPDATE user SET loginTime=? WHERE id=?';
+        public function __construct($idUser=NULL, $lastName=NULL, $firstName=NULL, $access_level=NULL, $birthDate=NULL, $nationality=NULL, $email=NULL, $password=NULL, $address=NULL, $city=NULL, $postalCode=NULL, $country=NULL, $cellNumber=NULL, $facebook=NULL, $instagram=NULL, $twitter=NULL, $google=NULL, $howDoYouKnow=NULL, $occupation=NULL, $children=NULL, $picture=NULL, $registrationDate = NULL, $loginTime = NULL, $logoutTime = NULL){
             parent::__construct();
             if (func_num_args()==1)
             {
@@ -34,35 +39,71 @@
             }
             else
             {
-                $this->loadFromInfo($idUser, $lastName, $firstName, $admin, $birthDate, $nationality, $email, $password, $address, $city, $postalCode, $country, $cellNumber, $facebook, $instagram, $twitter, $googlep, $howDoYouKnow, $occupation, $children, $picture, $registrationDate);
+                $this->loadFromInfo($idUser, $lastName, $firstName, $access_level, $birthDate, $nationality, $email, $password, $address, $city, $postalCode, $country, $cellNumber, $facebook, $instagram, $twitter, $google, $howDoYouKnow, $occupation, $children, $picture, $registrationDate, $loginTime, $logoutTime);
+            }
+        }
+        public function updateLogin($id){
+            try{
+                $this->execute(self::UPDATE_LOGIN, [time(), $id]);
+            } catch (Exception $ex) {
+                
+            }
+        }
+        public function create($email, $password){
+            try{
+                $this->execute(self::INSERT, [$email, cryptPassword($password), time()]);
+                return $this->lastInsert();
+            } catch (Exception $ex) {
+                return -1;
             }
         }
         public function canLogin($email, $password){
-            $req=$this->execute(self::EXIST_LOGIN, [$email, cryptPassword($password)]);
-            $data=$req->fetch();
-            return (isset($data["idUser"]))?$data["idUser"]:-1;
+            try{
+                $req=$this->execute(self::EXIST_LOGIN, [$email, cryptPassword($password)]);
+                $data=$req->fetch();
+                return (isset($data["idUser"]))?$data["idUser"]:-1;
+            } catch (Exception $ex) {
+                return -1;
+            }
         }
         public function canLoginNetwork($network, $token){
-            $req=$this->execute(__(self::EXIST_LOGIN_NETWORK, $network), [$token]);
-            $data=$req->fetch();
-            return (isset($data["idUser"]))?$data["idUser"]:-1;
+            try{
+                $req=$this->execute(__(self::EXIST_LOGIN_NETWORK, $network), [$token]);
+                $data=$req->fetch();
+                return (isset($data["idUser"]))?$data["idUser"]:-1;
+            } catch (Exception $ex) {
+                return -1;
+            }
+        }
+        public function existByMail($email){
+            try{
+                $req=$this->execute(self::EXIST_MAIL, [$email]);
+                return ($req->fetchColumn());
+            } catch (Exception $ex) {
+                return 1;
+            }
         }
         public function loadFromDb($idUser)
         {
-            $req=$this->execute(self::SELECT, [$idUser]);
-            $data=$req->fetch();
-            if (!isset($data["lastName"]))
-            {
-                $this->_errors=true;
-                return;
+            try{
+                $req=$this->execute(self::SELECT, [$idUser]);
+                $data=$req->fetch();
+                if (!isset($data["lastName"]))
+                {
+                    $this->_errors=true;
+                    return;
+                }
+                $this->loadFromInfo($idUser, $data["lastName"], $data["firstName"], $data["access_level"], $data["birthDate"], $data["nationality"], $data["email"], $data["password"], $data["address"], $data["city"], $data["postalCode"], $data["country"], $data["cellNumber"], $data["facebook"], $data["instagram"], $data["twitter"], $data["google"], $data["howDoYouKnow"], $data["occupation"], $data["children"], $data["picture"], $data["registrationDate"], $data["loginTime"], $data["logoutTime"]);
+            }  catch (Exception $ex) {
+
             }
-            $this->loadFromInfo($idUser, $data["lastName"], $data["firstName"], $data["admin"], $data["birthDate"], $data["nationality"], $data["email"], $data["password"], $data["address"], $data["city"], $data["postalCode"], $data["country"], $data["cellNumber"], $data["facebook"], $data["instagram"], $data["twitter"], $data["googlep"], $data["howDoYouKnow"], $data["occupation"], $data["children"], $data["picture"], $data["registrationDate"]);
+                
         }
-        public function loadFromInfo($idUser, $lastName, $firstName, $admin, $birthDate, $nationality, $email, $password, $address, $city, $postalCode, $country, $cellNumber, $facebook, $instagram, $twitter, $googlep, $howDoYouKnow, $occupation, $children, $picture, $registrationDate) {
-            $this->_idUser = $idUser;
+        public function loadFromInfo($idUser, $lastName, $firstName, $access_level, $birthDate, $nationality, $email, $password, $address, $city, $postalCode, $country, $cellNumber, $facebook, $instagram, $twitter, $google, $howDoYouKnow, $occupation, $children, $picture, $registrationDate, $loginTime, $logoutTime) {
+            $this->_id = $idUser;
             $this->_lastName = $lastName;
             $this->_firstName = $firstName;
-            $this->_admin = $admin;
+            $this->_access_level = $access_level;
             $this->_birthDate = $birthDate;
             $this->_nationality = $nationality;
             $this->_email = $email;
@@ -75,16 +116,18 @@
             $this->_facebook = $facebook;
             $this->_instagram = $instagram;
             $this->_twitter = $twitter;
-            $this->_googlep = $googlep;
+            $this->_google = $google;
             $this->_howDoYouKnow = $howDoYouKnow;
             $this->_occupation = $occupation;
             $this->_children = $children;
             $this->_picture = $picture;
             $this->_registrationDate = $registrationDate;
+            $this->_loginTime = $loginTime;
+            $this->_logoutTime = $logoutTime;
         }
         
-        public function getIdUser() {
-            return $this->_idUser;
+        public function getId() {
+            return $this->_id;
         }
 
         public function getLastName() {
@@ -95,8 +138,8 @@
             return $this->_firstName;
         }
 
-        public function getAdmin() {
-            return $this->_admin;
+        public function getAccessLevel() {
+            return $this->_access_level;
         }
 
         public function getBirthDate() {
@@ -143,8 +186,8 @@
             return $this->_twitter;
         }
 
-        public function getGooglep() {
-            return $this->_googlep;
+        public function getGoogle() {
+            return $this->_google;
         }
 
         public function getHowDoYouKnow() {
@@ -167,8 +210,8 @@
             return $this->_registrationDate;
         }
 
-        public function setIdUser($idUser) {
-            $this->_idUser = $idUser;
+        public function setId($idUser) {
+            $this->_id = $idUser;
         }
 
         public function setLastName($lastName) {
@@ -179,8 +222,8 @@
             $this->_firstName = $firstName;
         }
 
-        public function setAdmin($admin) {
-            $this->_admin = $admin;
+        public function setAccessLevel($admin) {
+            $this->_access_level = $admin;
         }
 
         public function setBirthDate($birthDate) {
@@ -227,8 +270,8 @@
             $this->_twitter = $twitter;
         }
 
-        public function setGooglep($googlep) {
-            $this->_googlep = $googlep;
+        public function setGoogle($google) {
+            $this->_google = $google;
         }
 
         public function setHowDoYouKnow($howDoYouKnow) {

@@ -3,10 +3,27 @@
         return preg_match("^(0|\+33)[1-9]([-. ]?[0-9]{2}){4}$", $phoneNumber);
     }
     function isEmail($email){
-        return filter_input(FILTER_VALIDATE_EMAIL, $email);
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
     function isAuth(){
-        return (isset($_SESSION["id"]) && $_SESSION["id"]>0);
+        $token=NULL;
+        $headers = apache_request_headers();
+        if(isset($headers['Authorization'])){
+            $matches = array();
+            preg_match('/Token token="(.*)"/', $headers['Authorization'], $matches);
+            if(isset($matches[1])){
+                $token = $matches[1];
+            }
+        }
+        return (decodeToken($token)!=NULL);
+    }
+    function decodeToken($token){
+        global $jwtKey;
+        try{
+            return JWT::decode($token, $jwtKey);
+        } catch (Exception $ex) {
+            return NULL;
+        }
     }
     function isMobile(){
         if (!($ua=filter_input(INPUT_SERVER, 'HTTP_USER_AGENT')))
@@ -28,7 +45,7 @@
     {
         return (($r=filter_input(INPUT_SERVER, 'HTTP_X_REQUESTED_WITH')) && strtolower($r)==='xmlhttprequest');
     }
-    function insert_require($key, $insert_controllers=false)
+    function insert_require($key)
     {
         global $modules;
         global $base_web;
@@ -42,13 +59,6 @@
         foreach ($modules[$key]["files"] as $file)
         {
             require_once($base_web.$file);
-        }
-        if ($insert_controllers)
-        {
-            foreach ($modules[$key]["controllers"] as $controller)
-            {
-                require_once($base_web.$controller);
-            }
         }
     }
     function cryptPassword($pass){

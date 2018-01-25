@@ -23,12 +23,22 @@
     $debug=ON;
     $base_web=ROOT_DIR."/../";
     $base_web_view=$base_web."../api2.meeterz.waapi.fr/";
-    define("ACCOUNT", 0);
+    define("USER", 0);
+    define("EVENTS", 1);
+    define("TALENT", 2);
     $lang_available=["fr", "en"];
-    $modules[ACCOUNT]=["state" => ON, // ON to put enabled the module
-                       "files" => ["Model/account.class.php"], // Which files we require to use it ?
-                       "controllers" => ["Controllers/account/account.controller.php"], // Which files we require to verify the data
-                       "modules" => []]; // Which others modules are require to use this one   
+    $modules[USER]=["state" => ON, // ON to put enabled the module
+                       "files" => ["Model/account.class.php", "Controllers/account.controller.php"], // Which files we require to use it ?
+                       "controllers" => "AccountController",
+                       "modules" => []]; // Which others modules are require to use this one  
+    $modules[EVENTS]=["state" => ON, // ON to put enabled the module
+                       "files" => ["Model/event.class.php", "Controllers/event.controller.php"], // Which files we require to use it ?
+                       "controllers" => "EventController",
+                       "modules" => []]; // Which others modules are require to use this one  
+    $modules[TALENT]=["state" => ON, // ON to put enabled the module
+                       "files" => ["Model/talent.class.php", "Controllers/talent.controller.php"], // Which files we require to use it ?
+                       "controllers" => "TalentController",
+                       "modules" => []]; // Which others modules are require to use this one  
     /**
         DO NOT TOUCH THE NEXT LINES
     **/

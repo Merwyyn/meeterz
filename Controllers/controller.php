@@ -13,7 +13,7 @@
                     break;
             }
         }
-        private function hadToBeAuth($state){
+        public function hadToBeAuth($state){
             if (($state && !isAuth()) || (!$state && isAuth()))
             {
                 header("HTTP/1.1 401 Unauthorized");

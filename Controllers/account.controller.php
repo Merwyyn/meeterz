@@ -1,22 +1,30 @@
 <?php
     class AccountController extends Controller {
         public function __construct(){ parent::__construct(); }
-        private function login(){
-            hadToBeAuth(false);
+        protected function login(){
+            $this->hadToBeAuth(false);
             global $jwtKey;
             try{
                 $email=filter_input(INPUT_POST, "email");
                 $password=filter_input(INPUT_POST, "password");
+                $stayLog=filter_input(INPUT_POST, "stayConnected");
                 $account=new Account();
                 $result=($email)?$account->canLogin($email, $password):$this->loginByNetworks($account);
                 if ($result<0)
                 {
                     throw new Exception(LOGIN_FAILED);
                 }
-                return ["token" => JWT::encode([
+                $account->updateLogin($result);
+                $time=time()+3600;
+                if ($stayLog==true)
+                {
+                    $time+=30*24*3600;
+                }
+                $token=JWT::encode([
                     'id' => $result,
                     'role' => 'User',
-                    'exp' => time() + 3600], $jwtKey)];
+                    'exp' => $time], $jwtKey);
+                return ["token" => $token];
             } catch (Exception $ex) {
                 return ["error" => $ex->getMessage()];
             }
@@ -35,8 +43,8 @@
             }
             return $account->canLoginNetwork($network_use, filter_input(INPUT_POST, $network_use));
         }
-        private function register(){
-            hadToBeAuth(false);
+        protected function register(){
+            $this->hadToBeAuth(false);
             try{
                 $email=trim(filter_input(INPUT_POST, "email"));
                 $password=filter_input(INPUT_POST, "password");
@@ -62,7 +70,7 @@
                 {
                     throw new Exception(REGISTER_FAILED);
                 }
-                return login();
+                return $this->login();
             } catch (Exception $ex) {
                 return ["error" => $ex->getMessage()];
             }

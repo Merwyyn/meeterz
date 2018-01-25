@@ -6,14 +6,12 @@
     header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");
     require 'Core/configuration.php';
     $request = explode("/", $_SERVER['REQUEST_URI']);
-    switch (strtolower($request[1])){
-        default:
-            header("HTTP/1.0 404 Not Found");
-            exit();
-            break;
-        case "user":
-            insert_require(ACCOUNT, true);
-            $accountController=new AccountController();
-            echo json_encode($accountController->buildFromRequest($request));
-            break;
+    $key_module=constant(strtoupper($request[1]));
+    if (!isset($modules[$key_module]))
+    {
+        header("HTTP/1.0 404 Not Found");
+        exit();
     }
+    insert_require($key_module);
+    $controller=new $modules[$key_module]["controllers"] ();
+    echo json_encode($controller->buildFromRequest($request));
