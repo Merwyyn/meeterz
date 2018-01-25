@@ -51,3 +51,9 @@
             }
         }
     }
+    function cryptPassword($pass){
+        global $prefix_hash;
+        $hash=$prefix_hash.$pass;
+        for ($i=0;$i<1000;$i++) { $hash=hash("sha256", $hash); }
+        return $hash;
+    }

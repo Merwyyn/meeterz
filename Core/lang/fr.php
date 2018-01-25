@@ -6,3 +6,4 @@
     define("ERROR_UPLOAD_PROGRESS", "Erreur lors de l'envoi de ficher.");
     define("ERROR_UPLOAD_WRONG_FORMAT_FILES", "");
     define("ERROR_UPLOAD_WRONG", "");
+    define("LOGIN_FAILED", "Ces identifiants ne correspondent à aucun utilisateur.");
