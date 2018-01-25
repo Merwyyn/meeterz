@@ -9,6 +9,7 @@
     $obligatory_files=["Core/lang/lang.php",
                        "Core/functions.php",
                        "Core/jwtToken.php",
+                       "Controllers/controller.php",
                        "Model/error.class.php",
                        "Model/modele.class.php"];
     $modules=[];

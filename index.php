@@ -11,14 +11,9 @@
             header("HTTP/1.0 404 Not Found");
             exit();
             break;
-        case "login":
-            if (isAuth())
-            {
-                header("HTTP/1.1 401 Unauthorized");
-                exit();
-            }
+        case "user":
             insert_require(ACCOUNT, true);
             $accountController=new AccountController();
-            echo json_encode($accountController->login());
+            echo json_encode($accountController->buildFromRequest($request));
             break;
     }
