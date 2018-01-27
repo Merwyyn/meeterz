@@ -6,16 +6,18 @@
         return filter_var($email, FILTER_VALIDATE_EMAIL);
     }
     function isAuth(){
+        return (getToken()!=NULL);
+    }
+    function getToken(){
         $token=NULL;
         $headers = apache_request_headers();
         if(isset($headers['Authorization'])){
-            $matches = array();
-            preg_match('/Token token="(.*)"/', $headers['Authorization'], $matches);
-            if(isset($matches[1])){
+            $matches = explode(" ", $headers['Authorization']);
+            if(count($matches)==2 && $matches[0]=="Bearer"){
                 $token = $matches[1];
             }
         }
-        return (decodeToken($token)!=NULL);
+        return decodeToken($token);
     }
     function decodeToken($token){
         global $jwtKey;

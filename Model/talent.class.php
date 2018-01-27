@@ -17,7 +17,8 @@
         private $_category;
         
         const SELECT = 'SELECT * FROM talent WHERE id=?';
-        const SELECT_TOP = 'SELECT id, firstName, lastName, profilePicture FROM talent WHERE id IN (SELECT idTalent, MAX(COUNT(*)) AS c FROM affinity GROUP BY (idTalent) ORDER BY c DESC LIMIT 12)';
+        const SELECT_TOP_ID = 'SELECT id, count(*) as occ FROM talent t LEFT OUTER JOIN affinity a ON a.idTalent=t.id GROUP BY id ORDER BY occ DESC LIMIT 12';
+        const SELECT_TOP = 'SELECT id, firstName, lastName, profilePicture FROM talent WHERE id IN (%ID_TOP%)';
         public function __construct($idTalent=NULL, $lastName=NULL, $firstName=NULL, $profilePicture=NULL, $headerPicture=NULL, $birthDate=NULL, $birthCity=NULL, $job=NULL, $occupation=NULL, $facebook=NULL, $instagram=NULL, $twitter=NULL, $googlep=NULL, $manager=NULL, $category=NULL) {
             parent::__construct();
             if (func_num_args()==1)
@@ -44,9 +45,24 @@
             } 
         }
         public function getTop(){
+            global $debug;
             try{
-                return $this->query(self::SELECT_TOP)->fetchAll(PDO::FETCH_COLUMN);
+                $ids="";
+                foreach ($this->query(self::SELECT_TOP_ID)->fetchAll(PDO::FETCH_COLUMN) as $id)
+                {
+                    if ($ids!="")
+                    {
+                        $ids.=",";
+                    }
+                    $ids.=$id;
+                }
+                $results=$this->query(__(self::SELECT_TOP, $ids))->fetchAll();
+                return $results;
             } catch(Exception $ex) {
+                if ($debug)
+                {
+                    return ["error" => $ex];
+                }
                 return [];
             } 
         }

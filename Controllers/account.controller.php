@@ -48,6 +48,7 @@
             try{
                 $email=trim(filter_input(INPUT_POST, "email"));
                 $password=filter_input(INPUT_POST, "password");
+                $password2=filter_input(INPUT_POST, "passwordConfirm");
                 $account=new Account();
                 if (!isEmail($email))
                 {
@@ -56,6 +57,10 @@
                 if (strlen($password)<6)
                 {
                     throw new Exception(PASSWORD_LENGTH);
+                }
+                if ($password!=$password2)
+                {
+                    throw new Exception(PASSWORD_NOT_MATCH);
                 }
                 if (strlen($email)>255)
                 {

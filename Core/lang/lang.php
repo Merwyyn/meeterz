@@ -28,10 +28,17 @@
         $texte_final=$constant;
         $array_temp=$array_var;
         $key=0;
-        while (preg_match("/%([a-zA-Z0-9_]+)%/", $texte_final) && $key<count($array_temp))
+        if (is_array($array_temp))
         {
+            while (preg_match("/%([a-zA-Z0-9_]+)%/", $texte_final) && $key<count($array_temp))
+            {
                 $texte_final=preg_replace('/%([a-zA-Z0-9_]+)%/', $array_temp[$key], $texte_final, 1);
                 $key++;
+            }
+        }
+        else
+        {
+            $texte_final=preg_replace('/%([a-zA-Z0-9_]+)%/', $array_temp, $texte_final, 1);
         }
         return $texte_final;
     }

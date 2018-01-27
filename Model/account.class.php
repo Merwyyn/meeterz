@@ -31,6 +31,7 @@
         const EXIST_MAIL = 'SELECT COUNT(*) FROM user WHERE email=?';
         const INSERT = 'INSERT INTO user (email, password, registrationDate) VALUES (?, ?, ?)';
         const UPDATE_LOGIN = 'UPDATE user SET loginTime=? WHERE id=?';
+        const UPDATE_LOGOUT = 'UPDATE user SET logoutTime=? WHERE id=?';
         public function __construct($idUser=NULL, $lastName=NULL, $firstName=NULL, $access_level=NULL, $birthDate=NULL, $nationality=NULL, $email=NULL, $password=NULL, $address=NULL, $city=NULL, $postalCode=NULL, $country=NULL, $cellNumber=NULL, $facebook=NULL, $instagram=NULL, $twitter=NULL, $google=NULL, $howDoYouKnow=NULL, $occupation=NULL, $children=NULL, $picture=NULL, $registrationDate = NULL, $loginTime = NULL, $logoutTime = NULL){
             parent::__construct();
             if (func_num_args()==1)
@@ -49,6 +50,13 @@
                 
             }
         }
+        public function updateLogout($id){
+            try{
+                $this->execute(self::UPDATE_LOGOUT, [time(), $id]);
+            } catch (Exception $ex) {
+                
+            }
+        }
         public function create($email, $password){
             try{
                 $this->execute(self::INSERT, [$email, cryptPassword($password), time()]);
@@ -61,7 +69,7 @@
             try{
                 $req=$this->execute(self::EXIST_LOGIN, [$email, cryptPassword($password)]);
                 $data=$req->fetch();
-                return (isset($data["idUser"]))?$data["idUser"]:-1;
+                return (isset($data["id"]))?$data["id"]:-1;
             } catch (Exception $ex) {
                 return -1;
             }
@@ -70,7 +78,7 @@
             try{
                 $req=$this->execute(__(self::EXIST_LOGIN_NETWORK, $network), [$token]);
                 $data=$req->fetch();
-                return (isset($data["idUser"]))?$data["idUser"]:-1;
+                return (isset($data["id"]))?$data["id"]:-1;
             } catch (Exception $ex) {
                 return -1;
             }

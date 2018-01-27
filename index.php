@@ -4,6 +4,10 @@
     header("Access-Control-Allow-Origin: https://meeterz.waapi.fr");
     header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
     header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    if (filter_input(INPUT_SERVER, 'REQUEST_METHOD') == 'OPTIONS')
+    {
+        exit();
+    }
     require 'Core/configuration.php';
     $request = explode("/", $_SERVER['REQUEST_URI']);
     $key_module=constant(strtoupper($request[1]));

@@ -17,7 +17,17 @@
         private $_brand;
         
         const SELECT = 'SELECT * FROM event WHERE idEvent=?';
-        const SELECT_NEXT = 'SELECT idEvent, name, dateLimit, picture, rules, place, placesMin FROM event WHERE dateLimit>? ORDER BY dateLimit ASC LIMIT 6';
+        const SELECT_NEXT = 'SELECT id, city, name, dateLimit, picture, description, placesLimitMin, COUNT(id) AS registered FROM event e '
+                . 'LEFT OUTER JOIN registration r ON e.id=r.idEvent '
+                . 'WHERE dateLimit>? AND openingDate<? AND r.validity=1 '
+                . 'GROUP BY (id) '
+                . 'HAVING registered<placesLimitMin '
+                . 'ORDER BY dateLimit ASC LIMIT 6';
+        const SELECT_BY_ID = 'SELECT id, city, name, dateLimit, picture, description, placesLimitMin, COUNT(id) AS registered FROM event e '
+                . 'LEFT OUTER JOIN registration r ON e.id=r.idEvent '
+                . 'WHERE dateLimit>? AND openingDate<? AND r.validity=1 AND id IN (%LISTE_ID%) '
+                . 'GROUP BY (id) '
+                . 'HAVING registered<placesLimitMin';
         public function __construct($idEvent=NULL, $name=NULL, $description=NULL, $place=NULL, $date=NULL, $dateLimit=NULL, $openingDate=NULL, $placesMax=NULL, $placesMin=NULL, $picture=NULL, $rules=NULL, $city=NULL, $ticket=NULL, $tags=NULL, $brand=NULL) {
             parent::__construct();
             if (func_num_args()==1)
@@ -29,14 +39,64 @@
                 $this->loadFromInfo($idEvent, $name, $description, $place, $date, $dateLimit, $openingDate, $placesMax, $placesMin, $picture, $rules, $city, $ticket, $tags, $brand);
             }
         }
-        public function getNextEvent(){
+        public function getMeetsById($ids){
+            global $debug;
             try{
-                $req=$this->execute(self::SELECT_NEXT, [time()]);
-                $result=$req->fetchAll(PDO::FETCH_COLUMN);
+                $results=$this->execute(__(self::SELECT_BY_ID, $ids), [time(), time()])->fetchAll();
+                foreach ($results as $k => $event)
+                {
+                    $tmp=$results[$k]["dateLimit"]-time();
+                    if ($tmp>24*3600)
+                    {
+                        $results[$k]["remainingTime"]="J-".floor($tmp/(24*3600));
+                    }
+                    else if ($tmp>3600)
+                    {
+                        $results[$k]["remainingTime"]="H-".floor($tmp/3600);
+                    }
+                    else
+                    {
+                        $results[$k]["remainingTime"]="M-".ceil($tmp/60);
+                    }
+                    $results[$k]["type"]="meet";
+                }
+                return $results;
             } catch(Exception $ex) {
-                $result=[];
+                if ($debug)
+                {
+                    return ["error" => $ex];
+                }
+                return [];
             } 
-            return $result;
+        }
+        public function getNextEvent(){
+            global $debug;
+            try{
+                $results=$this->execute(self::SELECT_NEXT, [time(), time()])->fetchAll();
+                foreach ($results as $k => $event)
+                {
+                    $tmp=$results[$k]["dateLimit"]-time();
+                    if ($tmp>24*3600)
+                    {
+                        $results[$k]["remainingTime"]="J-".floor($tmp/(24*3600));
+                    }
+                    else if ($tmp>3600)
+                    {
+                        $results[$k]["remainingTime"]="H-".floor($tmp/3600);
+                    }
+                    else
+                    {
+                        $results[$k]["remainingTime"]="M-".ceil($tmp/60);
+                    }
+                }
+                return $results;
+            } catch(Exception $ex) {
+                if ($debug)
+                {
+                    return ["error" => $ex];
+                }
+                return [];
+            } 
         }
         public function loadFromDb($idEvent){
             try{

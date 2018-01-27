@@ -12,3 +12,4 @@
     define("EMAIL_LENGTH", "L'adresse mail doit fiare au maximum 255 caractères.");
     define("EMAIL_EXIST", "Cette adresse mail est déjà utilisée.");
     define("REGISTER_FAILED", "Une erreur est survenue lors de l'inscription. Merci de réessayer.");
+    define("PASSWORD_NOT_MATCH", "Les mots de passe ne sont pas identiques");
