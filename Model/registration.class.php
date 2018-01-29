@@ -9,32 +9,40 @@
         const SELECT = 'SELECT * FROM registration WHERE idUser=? AND idEvent=?';
         const SELECT_BY_USER_VALID = 'SELECT idEvent FROM registration WHERE idUser=? AND validity=1';
         const SELECT_ID_RECOMMENDED = 'SELECT idEvent, COUNT(idEvent) as c FROM registration '
-                . 'WHERE idUser IN'
+                . 'WHERE idUser IN '
                     . '(SELECT idUser FROM registration '
                     . 'LEFT JOIN event ON idEvent=id '
-                    . 'WHERE idEvent IN (%LISTE_ID%) AND idUser!=? AND validity=1 AND dateLimit>? AND openingDate<?'
+                    . 'WHERE idEvent IN (%LISTE_ID%) AND idUser!=? AND validity=1 AND dateLimit>? AND openingDate<? '
                     . 'GROUP BY (idUser)) '
                 . 'AND idEvent NOT IN (%LISTE_ID2%) GROUP BY (idEvent) '
                 . 'ORDER BY c DESC LIMIT 6';
+        const COUNT_REGISTERED = 'SELECT COUNT(*) FROM registration WHERE validity=1';
+        const COUNT_REGISTERED_BY_ID = 'SELECT COUNT(*) FROM registration WHERE validity=1 AND idEvent=?';
+        const COUNT_PARTICIPATE = 'SELECT COUNT(*) FROM registration WHERE participation=1';
+        public function getCountRegisteredByEventId($idEvent){
+            return $this->execute(self::COUNT_REGISTERED_BY_ID, [$idEvent])->fetchColumn();
+        }
+        public function getCountRegistered(){
+            return $this->query(self::COUNT_REGISTERED)->fetchColumn();
+        }
+        public function getCountParticipate(){
+            return $this->query(self::COUNT_PARTICIPATE)->fetchColumn();
+        }
         public function getEventsRecommended($idUser){
             global $debug;
             try{
                 $req=$this->execute(self::SELECT_BY_USER_VALID, [$idUser]);
-                $idsEvent="";
+                $idsEvent=[];
                 while ($data=$req->fetch())
                 {
-                    if ($idsEvent!="")
-                    {
-                        $idsEvent.=",";
-                    }
-                    $idsEvent.=$data["idEvent"];
+                    $idsEvent[]=$data["idEvent"];
                 }
                 if (empty($idsEvent))
                 {
                     return [];
                 }
                 $data=[];
-                $req2=$this->execute(__(self::SELECT_ID_RECOMMENDED, $idsEvent, $idsEvent), [$idUser, time(), time()]);
+                $req2=$this->execute(__(self::SELECT_ID_RECOMMENDED, implode(",", $idsEvent), implode(",", $idsEvent)), [$idUser, time(), time()]);
                 while ($data2=$req2->fetch())
                 {
                     $data[]=$data2["idEvent"];

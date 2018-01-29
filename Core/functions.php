@@ -1,4 +1,7 @@
 <?php
+    function getMonthString($i){
+        return constant("MONTH_".$i);
+    }
     function isPhoneNumber($phoneNumber){
         return preg_match("^(0|\+33)[1-9]([-. ]?[0-9]{2}){4}$", $phoneNumber);
     }

@@ -22,7 +22,6 @@
                 }
                 $token=JWT::encode([
                     'id' => $result,
-                    'role' => 'User',
                     'exp' => $time], $jwtKey);
                 return ["token" => $token];
             } catch (Exception $ex) {
@@ -79,6 +78,13 @@
             } catch (Exception $ex) {
                 return ["error" => $ex->getMessage()];
             }
+        }
+        protected function logout(){
+            $this->hadToBeAuth(true);
+            $token = getToken();
+            $account = new Account();
+            $account->updateLogout($token->id);
+            return [];
         }
     }
     

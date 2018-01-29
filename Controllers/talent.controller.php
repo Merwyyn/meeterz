@@ -5,5 +5,9 @@
             $talent = new Talent();
             return $talent->getTop();
         }
+        protected function subscribe(){
+            $controllerAffinity=new AffinityController();
+            return $controllerAffinity->subscribe();
+        }
     }
     

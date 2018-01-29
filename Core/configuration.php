@@ -27,6 +27,8 @@
     define("EVENT", 1);
     define("TALENT", 2);
     define("REGISTRATION", 3);
+    define("AFFINITY", 4);
+    define("TAG", 5);
     $lang_available=["fr", "en"];
     $modules[USER]=["state" => ON, // ON to put enabled the module
                        "files" => ["Model/account.class.php", "Controllers/account.controller.php"], // Which files we require to use it ?
@@ -35,14 +37,22 @@
     $modules[EVENT]=["state" => ON, // ON to put enabled the module
                        "files" => ["Model/event.class.php", "Controllers/event.controller.php"], // Which files we require to use it ?
                        "controllers" => "EventController",
-                       "modules" => [USER, REGISTRATION]]; // Which others modules are require to use this one  
+                       "modules" => [USER, REGISTRATION, TALENT, TAG]]; // Which others modules are require to use this one  
     $modules[TALENT]=["state" => ON, // ON to put enabled the module
                        "files" => ["Model/talent.class.php", "Controllers/talent.controller.php"], // Which files we require to use it ?
                        "controllers" => "TalentController",
-                       "modules" => []]; // Which others modules are require to use this one  
+                       "modules" => [AFFINITY]]; // Which others modules are require to use this one  
     $modules[REGISTRATION]=["state" => ON, // ON to put enabled the module
                        "files" => ["Model/registration.class.php", "Controllers/registration.controller.php"], // Which files we require to use it ?
                        "controllers" => "RegistrationController",
+                       "modules" => []]; // Which others modules are require to use this one  
+    $modules[AFFINITY]=["state" => ON, // ON to put enabled the module
+                       "files" => ["Model/affinity.class.php", "Controllers/affinity.controller.php"], // Which files we require to use it ?
+                       "controllers" => "AffinityController",
+                       "modules" => []]; // Which others modules are require to use this one  
+    $modules[TAG]=["state" => ON, // ON to put enabled the module
+                       "files" => ["Model/tag.class.php"], // Which files we require to use it ?
+                       "controllers" => "",
                        "modules" => []]; // Which others modules are require to use this one  
     /**
         DO NOT TOUCH THE NEXT LINES
