@@ -1,7 +1,9 @@
 <?php
     class Controller{
+        protected $_request;
         public function __construct(){ }
         public function buildFromRequest($r){
+            $this->_request=$r;
             $action=(count($r)>2)?$r[2]:$r[1];
             switch ($action){
                 default:

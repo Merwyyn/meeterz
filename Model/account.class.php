@@ -30,6 +30,7 @@
         const EXIST_LOGIN_NETWORK = 'SELECT id FROM user WHERE %NETWORK%=?';
         const EXIST_MAIL = 'SELECT COUNT(*) FROM user WHERE email=?';
         const INSERT = 'INSERT INTO user (email, password, registrationDate) VALUES (?, ?, ?)';
+        const INSERT_NETWORKS = 'INSERT INTO user (email, password, %NETWORK%, registrationDate) VALUES (NULL, NULL, ?, ?)';
         const UPDATE_LOGIN = 'UPDATE user SET loginTime=? WHERE id=?';
         const UPDATE_LOGOUT = 'UPDATE user SET logoutTime=? WHERE id=?';
         public function __construct($idUser=NULL, $lastName=NULL, $firstName=NULL, $access_level=NULL, $birthDate=NULL, $nationality=NULL, $email=NULL, $password=NULL, $address=NULL, $city=NULL, $postalCode=NULL, $country=NULL, $cellNumber=NULL, $facebook=NULL, $instagram=NULL, $twitter=NULL, $google=NULL, $howDoYouKnow=NULL, $occupation=NULL, $children=NULL, $picture=NULL, $registrationDate = NULL, $loginTime = NULL, $logoutTime = NULL){
@@ -86,6 +87,14 @@
         public function create($email, $password){
             try{
                 $this->execute(self::INSERT, [$email, cryptPassword($password), time()]);
+                return $this->lastInsert();
+            } catch (Exception $ex) {
+                return -1;
+            }
+        }
+        public function createFrom($network, $code){
+            try{
+                $this->execute(__(self::INSERT_NETWORKS, $network), [$code, time()]);
                 return $this->lastInsert();
             } catch (Exception $ex) {
                 return -1;

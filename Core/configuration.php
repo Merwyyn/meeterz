@@ -29,11 +29,12 @@
     define("REGISTRATION", 3);
     define("AFFINITY", 4);
     define("TAG", 5);
+    define("API_NETWORKS", 6);
     $lang_available=["fr", "en"];
     $modules[USER]=["state" => ON, // ON to put enabled the module
                        "files" => ["Model/account.class.php", "Controllers/account.controller.php"], // Which files we require to use it ?
                        "controllers" => "AccountController",
-                       "modules" => []]; // Which others modules are require to use this one  
+                       "modules" => [API_NETWORKS]]; // Which others modules are require to use this one  
     $modules[EVENT]=["state" => ON, // ON to put enabled the module
                        "files" => ["Model/event.class.php", "Controllers/event.controller.php"], // Which files we require to use it ?
                        "controllers" => "EventController",
@@ -52,6 +53,10 @@
                        "modules" => []]; // Which others modules are require to use this one  
     $modules[TAG]=["state" => ON, // ON to put enabled the module
                        "files" => ["Model/tag.class.php"], // Which files we require to use it ?
+                       "controllers" => "",
+                       "modules" => []]; // Which others modules are require to use this one  
+    $modules[API_NETWORKS]=["state" => ON, // ON to put enabled the module
+                       "files" => ["Core/google/vendor/autoload.php"], // Which files we require to use it ?
                        "controllers" => "",
                        "modules" => []]; // Which others modules are require to use this one  
     /**

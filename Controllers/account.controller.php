@@ -9,7 +9,7 @@
                 $password=filter_input(INPUT_POST, "password");
                 $stayLog=filter_input(INPUT_POST, "stayConnected");
                 $account=new Account();
-                $result=($email)?$account->canLogin($email, $password):$this->loginByNetworks($account);
+                $result=$account->canLogin($email, $password);
                 if ($result<0)
                 {
                     throw new Exception(LOGIN_FAILED);
@@ -28,19 +28,40 @@
                 return ["error" => $ex->getMessage()];
             }
         }
-        private function loginByNetworks($account){
+        protected function google(){
+            $google_id=NULL;
+            $client = new Google_Client();
+            $client->setApplicationName("Backend_Meeterz");
+            $client->setDeveloperKey("SERVER_KEY");
+            $client->authenticate(filter_input(INPUT_POST, "code"));
+            $access_token = $client->getAccessToken();
+            $ticket = $client->verifyIdToken($access_token);
+            if ($ticket) {
+              $data = $ticket->getAttributes();
+              $google_id=$data['payload']['sub']; // user ID
+            }
+            return $this->loginNetworks("google", $google_id);
+        }
+        protected function loginNetworks($network, $code){
             $this->hadToBeAuth(false);
-            global $networks;
-            $network_use=null;
-            foreach ($networks as $network)
-            {
-                $network_use=(filter_input(INPUT_POST, $network))?$network:$network_use;
+            global $jwtKey;
+            try{
+                $account=new Account();
+                $result=$account->canLoginNetwork($network, $code);
+                if ($result<0)
+                {
+                    $account->createFrom($network, $code);
+                    return $this->loginNetworks($network, $code);
+                }
+                $account->updateLogin($result);
+                $time=time()+3600;
+                $token=JWT::encode([
+                    'id' => $result,
+                    'exp' => $time], $jwtKey);
+                return ["token" => $token];
+            } catch (Exception $ex) {
+                return ["error" => $ex->getMessage()];
             }
-            if (!$network_use)
-            {
-                throw new Exception(LOGIN_FAILED);
-            }
-            return $account->canLoginNetwork($network_use, filter_input(INPUT_POST, $network_use));
         }
         protected function register(){
             $this->hadToBeAuth(false);
