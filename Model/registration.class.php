@@ -20,15 +20,39 @@
                 . 'ORDER BY c DESC LIMIT 6';
         const COUNT_REGISTERED = 'SELECT COUNT(*) FROM registration WHERE validity=1';
         const COUNT_REGISTERED_BY_ID = 'SELECT COUNT(*) FROM registration WHERE validity=1 AND idEvent=?';
+        const COUNT_PARTICIPATE_BY_ID = 'SELECT COUNT(*) FROM registration WHERE participation=1 AND idEvent=?';
         const COUNT_PARTICIPATE = 'SELECT COUNT(*) FROM registration WHERE participation=1';
+        const COUNT_DONE_BY_USER = 'SELECT COUNT(*) FROM registration LEFT JOIN event ON id=idEvent WHERE idUser=? AND participation=1 AND event.date<?';
+        const COUNT_PARTICIPATE_MONTH_BY_USER = 'SELECT COUNT(*) FROM registration LEFT JOIN event ON id=idEvent WHERE idUser=? AND participation=1 AND event.date>=? AND event.date<=?';
+        const COUNT_REGISTER_BY_USER = 'SELECT COUNT(*) FROM registration WHERE idUser=? AND validity=1';
+        const SELECT_USER_PARICIPATE_BY_EVENT = 'SELECT u.picture FROM registration r LEFT JOIN user u ON u.id=r.idUser WHERE r.idEvent=?';
+        public function getListParticipateByEventId($idEvent){
+            return $this->execute(self::SELECT_USER_PARICIPATE_BY_EVENT, [$idEvent])->fetchAll(PDO::FETCH_COLUMN);
+        }
         public function getCountRegisteredByEventId($idEvent){
             return $this->execute(self::COUNT_REGISTERED_BY_ID, [$idEvent])->fetchColumn();
+        }
+        public function getCountParticipateByEventId($idEvent){
+            return $this->execute(self::COUNT_PARTICIPATE_BY_ID, [$idEvent])->fetchColumn();
         }
         public function getCountRegistered(){
             return $this->query(self::COUNT_REGISTERED)->fetchColumn();
         }
         public function getCountParticipate(){
             return $this->query(self::COUNT_PARTICIPATE)->fetchColumn();
+        }
+        public function getCountDoneByUser($idUser){
+            return $this->execute(self::COUNT_DONE_BY_USER, [$idUser, time()])->fetchColumn();
+        }
+        public function getCountParticipateMonthByUser($idUser){
+            $m=date("m");$y=date("Y");
+            $timeMonthStart=strtotime("01-".$m."-".$y);
+            $m++; if ($m>12){ $m=01; $y++; }
+            $timeMonthEnd=strtotime("01-".$m."-".$y)-1;
+            return $this->execute(self::COUNT_PARTICIPATE_MONTH_BY_USER, [$idUser, $timeMonthStart, $timeMonthEnd])->fetchColumn();
+        }
+        public function getCountRegisteredByUser($idUser){
+            return $this->execute(self::COUNT_REGISTER_BY_USER, [$idUser])->fetchColumn();
         }
         public function getEventsRecommended($idUser){
             global $debug;

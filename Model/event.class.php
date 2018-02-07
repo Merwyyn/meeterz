@@ -50,6 +50,7 @@
         const SELECT_NEXT_EVENTS = 'SELECT event.idTalent, id, city, name, openingDate, picture, description FROM event WHERE openingDate>? ORDER BY openingDate ASC LIMIT %COUNT%';
         const SELECT_PAST_EVENTS = 'SELECT event.idTalent, id, city, name, picture, description FROM event WHERE dateLimit<? ORDER BY dateLimit ASC LIMIT %COUNT%';
         const SELECT_ID_BY_CITY = 'SELECT id FROM event WHERE city=? AND dateLimit>? AND openingDate<?';
+        const SELECT_EVENT_TODAY_BY_USER = 'SELECT e.id, CONCAT(t.firstName, t.lastName) AS meetingname, e.picture AS meetingpp, e.date AS meetingtime, e.city AS meetingplace FROM event e LEFT JOIN registration r ON e.id=r.idEvent LEFT JOIN talent t ON e.idTalent=t.id WHERE r.idUser=? AND e.date>=? AND e.date<?';
         public function __construct($id=NULL, $idTalent=NULL, $name=NULL, $description=NULL, $place=NULL, $date=NULL, $dateLimit=NULL, $openingDate=NULL, $placesLimitMin=NULL, $placesLimitMax=NULL, $picture=NULL, $video=NULL, $video_picture=NULL, $rules=NULL, $city=NULL, $ticket=NULL, $tags=NULL, $brand=NULL) {
             parent::__construct();
             if (func_num_args()==1)
@@ -59,6 +60,19 @@
             else
             {
                 $this->loadFromInfo($id, $idTalent, $name, $description, $place, $date, $dateLimit, $openingDate, $placesLimitMin, $placesLimitMax, $picture, $video, $video_picture, $rules, $city, $ticket, $tags, $brand);
+            }
+        }
+        public function getEventTodayByUser($idUser){
+            $registration=new Registration();
+            $today=strtotime(date("d-m-Y"));
+            $results=$this->execute(self::SELECT_EVENT_TODAY_BY_USER, [$idUser, $today, $today+24*3600])->fetchAll(PDO::FETCH_COLUMN);
+            for ($i=0;$i<count($results);$i++)
+            {
+                $results[$i]["date"]=date("H:i", $results[$i]["date"]);
+                $results[$i]["meetingemail"]="lorem@lipsum.com";
+                $results[$i]["goinglist"]=$registration->getListParticipateByEventId($results[$i]["id"]);
+                $results[$i]["going"]=count($results[$i]["goinglist"]);
+                $results[$i]["pending"]=$registration->getCountRegisteredByEventId($results[$i]["id"])-$results[$i]["going"];
             }
         }
         public function getIdByCity($city){

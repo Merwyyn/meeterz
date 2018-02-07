@@ -108,8 +108,22 @@
             return [];
         }
         protected function get(){
+            $this->hadToBeAuth(true);
             $account = new Account(getToken()->id);
             return $account->toData();
+        }
+        protected function meetHistory(){
+            $this->hadToBeAuth(true);
+            $token = getToken();
+            $registration = new Registration();
+            $event = new Event();
+            $results=[];
+            $results["nbmeets"]=$registration->getCountParticipateMonthByUser($token->id);
+            $results["nbmeetsRegistered"]=$registration->getCountRegisteredByUser($token->id);
+            $results["nbmeetsDone"]=$registration->getCountDoneByUser($token->id);
+            $results["meets"]=$event->getEventTodayByUser($idUser);
+            $results["meetstoday"]=count($results["meets"]);
+            return $results;
         }
     }
     
