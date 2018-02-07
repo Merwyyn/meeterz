@@ -43,6 +43,32 @@
                 $this->loadFromInfo($idUser, $lastName, $firstName, $access_level, $birthDate, $nationality, $email, $password, $address, $city, $postalCode, $country, $cellNumber, $facebook, $instagram, $twitter, $google, $howDoYouKnow, $occupation, $children, $picture, $registrationDate, $loginTime, $logoutTime);
             }
         }
+        public function toData(){
+            return ["lastName" => $this->_lastName,
+                    "firstName" => $this->_firstName,
+                    "access_level" => $this->_access_level,
+                    "birthDate" => $this->_birthDate,
+                    "nationality" => $this->_nationality,
+                    "email" => $this->_email,
+                    "address" => $this->_address,
+                    "city" => $this->_city,
+                    "postalCode" => $this->_postalCode,
+                    "country" => $this->_country,
+                    "cellNumber" => $this->_cellNumber,
+                    "facebook" => $this->_facebook,
+                    "instagram" => $this->_instagram,
+                    "twitter" => $this->_twitter,
+                    "google" => $this->_google,
+                    "howDoYouKnow" => $this->_howDoYouKnow,
+                    "occupation" => $this->_occupation,
+                    "children" => $this->_children,
+                    "picture" => $this->_picture,
+                    "registrationDate" => $this->_registrationDate];
+        }
+        public function profilComplete(){
+            return ($this->_lastName && $this->_firstName && $this->_address && $this->_birthDate && 
+                    $this->_city && $this->_postalCode && $this->_country && $this->_cellNumber);
+        }
         public function updateLogin($id){
             try{
                 $this->execute(self::UPDATE_LOGIN, [time(), $id]);

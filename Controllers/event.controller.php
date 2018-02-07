@@ -5,6 +5,19 @@
             $event = new Event();
             return $event->getNextEvent();
         }
+        protected function register(){
+            $this->hadToBeAuth(true);
+            $id = filter_input(INPUT_POST, "id");
+            $event = new Event($id);
+            $user = new Account(getToken()->id);
+            if ($event->haveErrors())
+            {
+                return ["error" => EVENT_NOT_EXIST];
+            }
+            $registration=new Registration($user->getId(), $id, $user->profilComplete(), time(), false);
+            $registration->save();
+            return [];
+        }
         protected function getByCity(){
             $this->hadToBeAuth(true);
             $city = filter_input(INPUT_POST, "city");
@@ -51,6 +64,8 @@
             }
             $result["date_string"]=date("d", $result["date"])." ".getMonthString(date("m", $result["date"]))." ".date("Y", $result["date"])." à ".date("H:i", $result["date"]);
             $result["openingDate_string"]=date("d", $result["openingDate"])." ".getMonthString(date("m", $result["openingDate"]))." ".date("Y", $result["openingDate"])." à ".date("H:i", $result["openingDate"]);
+            $registration=new Registration(getToken()->id, $result["id"]);
+            $result["user"]=["register" => !$registration->haveErrors(), "validity" => (!$registration->haveErrors() && $registration->getValidity()), "participate" => (!$registration->haveErrors() && $registration->getParticipation())];
             return $result;
         }
         protected function search(){

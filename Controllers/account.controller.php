@@ -86,5 +86,9 @@
             $account->updateLogout($token->id);
             return [];
         }
+        protected function get(){
+            $account = new Account(getToken()->id);
+            return $account->toData();
+        }
     }
     
