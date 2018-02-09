@@ -22,9 +22,9 @@
             $affinity->save();
             return [];
         }
-        public function searched(){
+        public function searched($idTalentArg=NULL){
             $this->hadToBeAuth(true);
-            $idTalent=filter_input(INPUT_POST, "talent");
+            $idTalent=($idTalentArg)?$idTalentArg:filter_input(INPUT_POST, "talent");
             if (!$idTalent)
             {
                 return [];

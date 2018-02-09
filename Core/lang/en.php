@@ -26,3 +26,4 @@
     define("MONTH_10", "Octobre");
     define("MONTH_11", "Novembre");
     define("MONTH_12", "Décembre");
+    define("ERROR_CREATE_BRAND", "Impossible de créer une marque");

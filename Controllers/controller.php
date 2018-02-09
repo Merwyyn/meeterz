@@ -22,4 +22,13 @@
                 exit();
             }
         }
+        public function hadToBeAdmin(){
+            $this->hadToBeAuth(true);
+            $user=new Account(getToken()->id);  
+            if ($user->getAccessLevel()<=0)
+            {
+                header("HTTP/1.1 401 Unauthorized");
+                exit();
+            }
+        }
     }

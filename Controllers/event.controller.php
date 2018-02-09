@@ -14,9 +14,10 @@
             {
                 return ["error" => EVENT_NOT_EXIST];
             }
-            $registration=new Registration($user->getId(), $id, $user->profilComplete(), time(), false);
+            $user_valid=$user->profilComplete();
+            $registration=new Registration($user->getId(), $id, $user_valid, time(), false);
             $registration->save();
-            return [];
+            return ["valid" => $user_valid];
         }
         protected function getByCity(){
             $this->hadToBeAuth(true);
@@ -69,10 +70,19 @@
             return $result;
         }
         protected function search(){
+            $affinityController = new AffinityController();
             $this->hadToBeAuth(true);
             $search = filter_input(INPUT_POST, "search");
+            $city_form = json_decode(filter_input(INPUT_POST, "city"), true);
+            $domain_form = json_decode(filter_input(INPUT_POST, "domain"), true);
+            $talent_form = json_decode(filter_input(INPUT_POST, "talent"), true);
+            if (!empty($talent_form)){
+                foreach ($talent_form as $talent_id){
+                    $affinityController->searched($talent_id);
+                }
+            }
             $event = new Event();
-            $token = getToken();
+            $token= getToken();
             $registration = new Registration();
             $data=$registration->getEventsRecommended($token->id);
             $results=[];
@@ -81,6 +91,19 @@
                 $results_tmp=$event->getMeetsById(implode(",",$data));
                 foreach ($results_tmp as $k => $v)
                 {
+                    $talent = new Talent($results_tmp[$k]["id"]);
+                    if (!empty($city_form) && !in_array($results_tmp[$k]["city"], $city_form))
+                    {
+                        continue;
+                    }
+                    if (!empty($domain_form) && !in_array($talent->getOccupation(), $domain_form))
+                    {
+                        continue;
+                    }
+                    if (!empty($talent_form) && !in_array($results_tmp[$k]["id"], $talent_form))
+                    {
+                        continue;
+                    }
                     $results_tmp[$k]["type"]="meet";
                     if (!empty($search) && (strstr($results_tmp[$k]["city"], $search) || strstr($results_tmp[$k]["name"], $search)))
                     {
@@ -88,7 +111,6 @@
                     }
                     else if (!empty($search))
                     {
-                        $talent = new Talent($results_tmp[$k]["id"]);
                         if (strstr($talent->getLastName(), $search) || strstr($talent->getFirstName(), $search))
                         {
                             $results[]=$results_tmp[$k];

@@ -121,7 +121,7 @@
             $results["nbmeets"]=$registration->getCountParticipateMonthByUser($token->id);
             $results["nbmeetsRegistered"]=$registration->getCountRegisteredByUser($token->id);
             $results["nbmeetsDone"]=$registration->getCountDoneByUser($token->id);
-            $results["meets"]=$event->getEventTodayByUser($idUser);
+            $results["meets"]=$event->getEventTodayByUser($token->id);
             $results["meetstoday"]=count($results["meets"]);
             return $results;
         }

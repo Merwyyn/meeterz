@@ -15,6 +15,7 @@
     $modules=[];
     $prefix_hash="E48#Idxn";
     $jwtKey="EmpkNz87Afamp";
+    define("MAX_SIZE_UPLOAD_ONCE", 12000000); // 12 MO
     /** 
         YOU CAN EDIT NOW
     **/
@@ -22,7 +23,7 @@
     $database_config=["host" => 'localhost', "user" => 'dr166627', "password" => 'bTrm5&45', "database" => 'meeterz_dev2'];
     $debug=ON;
     $base_web=ROOT_DIR."/../";
-    $base_web_view=$base_web."../api2.meeterz.waapi.fr/";
+    $base_web_view=$base_web."../meeterz.campandjoy.fr/";
     define("USER", 0);
     define("EVENT", 1);
     define("TALENT", 2);
@@ -30,6 +31,7 @@
     define("AFFINITY", 4);
     define("TAG", 5);
     define("API_NETWORKS", 6);
+    define("BRAND", 7);
     $lang_available=["fr", "en"];
     $modules[USER]=["state" => ON, // ON to put enabled the module
                        "files" => ["Model/account.class.php", "Controllers/account.controller.php"], // Which files we require to use it ?
@@ -52,8 +54,12 @@
                        "controllers" => "AffinityController",
                        "modules" => []]; // Which others modules are require to use this one  
     $modules[TAG]=["state" => ON, // ON to put enabled the module
-                       "files" => ["Model/tag.class.php"], // Which files we require to use it ?
-                       "controllers" => "",
+                       "files" => ["Model/tag.class.php", "Controllers/tag.controller.php"], // Which files we require to use it ?
+                       "controllers" => "TagController",
+                       "modules" => []]; // Which others modules are require to use this one  
+    $modules[BRAND]=["state" => ON, // ON to put enabled the module
+                       "files" => ["Model/brand.class.php", "Controllers/brand.controller.php"], // Which files we require to use it ?
+                       "controllers" => "BrandController",
                        "modules" => []]; // Which others modules are require to use this one  
     $modules[API_NETWORKS]=["state" => ON, // ON to put enabled the module
                        "files" => ["Core/google/vendor/autoload.php"], // Which files we require to use it ?

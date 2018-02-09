@@ -6,7 +6,10 @@
         private $_name;
         
         const SELECT = 'SELECT * FROM tags WHERE id=?';
-
+        const SELECT_ALL = 'SELECT * FROM tags';
+        const CREATE = 'INSERT INTO tags (icon, description, name) VALUES (?, ?, ?)';
+        const DELETE = 'DELETE FROM tags WHERE id=?';
+        const UPDATE = 'UPDATE tags SET icon=?, description=?, name=? WHERE id=?';
         public function __construct($id=NULL, $icon=NULL, $description=NULL, $name=NULL) {
             parent::__construct();
             if (func_num_args()==1)
@@ -32,11 +35,34 @@
                 
             } 
         }
+        public function save(){
+            try{
+                if ($this->_id){
+                    $this->execute(self::UPDATE, [$this->_icon, $this->_description, $this->_name, $this->_id]);
+                } else {
+                    $this->execute(self::CREATE, [$this->_icon, $this->_description, $this->_name]);
+                }
+                return ["success" => true];
+            } catch (Exception $ex) {
+                return ["error" => WRONG_HAPPENS];
+            }
+        }
+        public function delete(){
+            try{
+                $this->execute(self::DELETE, [$this->_id]);
+                return ["success" => true];
+            } catch (Exception $ex) {
+                return ["error" => WRONG_HAPPENS];
+            }
+        }
         public function loadFromInfo($id, $icon, $description, $name) {
             $this->_id = $id;
             $this->_icon = $icon;
             $this->_description = $description;
             $this->_name = $name;
+        }
+        public function getAll(){
+            return $this->query(self::SELECT_ALL)->fetchAll(PDO::FETCH_COLUMN);
         }
         public function getId() {
             return $this->_id;

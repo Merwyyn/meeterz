@@ -1,7 +1,7 @@
 <?php
 define("PICTURES", 0);
 define("FILES", 1);
-class Upload extends Error{
+class Upload extends ErrorType{
 	private $_paths;
 	public function __construct($data, $type, $from)
 	{
@@ -18,7 +18,7 @@ class Upload extends Error{
     }
     private function upload_pictures($data, $from)
     {
-        global $base_web_view, $keyCamping;
+        global $base_web_view;
         $extensions_valides=['jpg', 'png', 'jpeg', 'gif', 'bmp'];
         foreach ($data as $image)
 		{
@@ -60,7 +60,7 @@ class Upload extends Error{
                 $this->addErrors(ERROR_UPLOAD_WRONG_FORMAT_FILES);
                 break;
             }
-            $location=$base_web_view."images/uploaded/".$keyCamping."/".$from."/";
+            $location=$base_web_view."assets/images/uploaded/".$from."/";
             $name_file=md5(uniqid(rand(), true)).".".$extension;
             if (!mkdir($location, 0777, true) || !move_uploaded_file($image['tmp_name'],$location.$name_file))
             {
