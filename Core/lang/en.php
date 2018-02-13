@@ -14,8 +14,8 @@
     define("REGISTER_FAILED", "Une erreur est survenue lors de l'inscription. Merci de réessayer.");
     define("PASSWORD_NOT_MATCH", "Les mots de passe ne sont pas identiques");
     define("EVENT_NOT_EXIST", "Ce meet n'existe pas.");
-    define("MONTH_01", "January");
-    define("MONTH_02", "February");
+    define("MONTH_01", "Janvier");
+    define("MONTH_02", "Février");
     define("MONTH_03", "Mars");
     define("MONTH_04", "Avril");
     define("MONTH_05", "Mai");
@@ -27,3 +27,6 @@
     define("MONTH_11", "Novembre");
     define("MONTH_12", "Décembre");
     define("ERROR_CREATE_BRAND", "Impossible de créer une marque");
+    define("ERROR_CREATE_TAG", "Impossible de créer un tag");
+    define("WRONG_HAPPENS", "Une erreur est survenue.");
+    

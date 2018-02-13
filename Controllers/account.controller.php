@@ -8,6 +8,9 @@
                 $email=filter_input(INPUT_POST, "email");
                 $password=filter_input(INPUT_POST, "password");
                 $stayLog=filter_input(INPUT_POST, "stayConnected");
+                if (empty($password)){
+                    throw new Exception(LOGIN_FAILED);
+                }
                 $account=new Account();
                 $result=$account->canLogin($email, $password);
                 if ($result<0)
@@ -27,6 +30,87 @@
             } catch (Exception $ex) {
                 return ["error" => $ex->getMessage()];
             }
+        }
+        protected function twitter(){
+            $twitteroauth = new TwitterOAuth("wJ7nzXpgofAl700CP3QWr0xmr", "hAWHwuDSyF4tYANKdSuxBt3bC1ErUBi7G4qUh1zO2L8Z0AGD4x");
+            $request_token = $twitteroauth->oauth(
+                'oauth/request_token', [
+                    'oauth_callback' => "https://meeterz.waapi.fr"
+                ]
+            );
+            if($twitteroauth->getLastHttpCode() != 200) {
+                return ["error" => WRONG_HAPPENS];
+            }
+            return ["oauth_token" => $request_token['oauth_token']];
+        }
+        protected function instagram(){
+            $postdata = file_get_contents("php://input");
+            $request = json_decode($postdata);
+            if (!isset($request->code))
+            {
+                return ["error" => WRONG_HAPPENS];
+            }
+            $params = http_build_query([
+                'code' => $request->code,
+                'grant_type' => "authorization_code",
+                'client_id' => "3518b868b8744687bc53917977d3f5ad",
+                'redirect_uri' => $request->redirectUri,
+                'client_secret' => "169bf216ac474073a8df49b4d95b3ee9"
+            ]);
+            $opts = array('http' =>
+                array(
+                    'method'  => 'POST',
+                    'header'  => 'Content-type: application/x-www-form-urlencoded',
+                    'content' => $params
+                )
+            );
+            $context  = stream_context_create($opts);
+            $output = json_decode(file_get_contents('https://api.instagram.com/oauth/access_token', false, $context));
+            if (!isset($output->access_token))
+            {
+                return ["error" => WRONG_HAPPENS];
+            }
+            $user=$output->user;
+            $full_name=$user->full_name;
+            $tmp=explode(" ", $full_name);
+            return $this->loginNetworks("instagram", $user->id, ["picture" => $user->profile_picture, "lastName" => $tmp[count($tmp)-1], "firstName" => $tmp[0]]);
+        }
+        protected function facebook(){
+            $postdata = file_get_contents("php://input");
+            $request = json_decode($postdata);
+            if (!isset($request->code))
+            {
+                return ["error" => WRONG_HAPPENS];
+            }
+            $params = [
+                'code' => $request->code,
+                'client_id' => $request->clientId,
+                'redirect_uri' => $request->redirectUri,
+                'client_secret' => "e927ad362c20c63b8b3b41c553f88bc5"
+            ];
+            $url="https://graph.facebook.com/v2.5/oauth/access_token?";
+            foreach ($params as $k=>$v){
+                $url.=$k."=".$v."&";
+            }
+            $output=json_decode(file_get_contents($url));
+            if (!isset($output->access_token))
+            {
+                return ["error" => WRONG_HAPPENS];
+            }
+            $fb = new Facebook\Facebook([
+                'app_id' => '173145989991407',
+                'app_secret' => 'e927ad362c20c63b8b3b41c553f88bc5',
+                'default_graph_version' => 'v2.2'
+                ]);
+            try {
+                $response = $fb->get('/me?fields=first_name,last_name,email', $output->access_token);
+            } catch(\Facebook\Exceptions\FacebookResponseException $e) {
+                return ["error" => $e->getMessage()];
+            } catch(\Facebook\Exceptions\FacebookSDKException $e) {
+                return ["error" => $e->getMessage()];
+            }
+            $me = $response->getGraphUser();
+            return $this->loginNetworks("facebook", $me->getId(), ["email" => $me["email"], "lastName" => $me["last_name"], "firstName" => $me["first_name"]]);
         }
         protected function google(){
             global $base_web;

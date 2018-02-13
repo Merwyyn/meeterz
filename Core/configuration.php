@@ -72,7 +72,7 @@
                        "controllers" => "BrandController",
                        "modules" => []]; // Which others modules are require to use this one  
     $modules[API_NETWORKS]=["state" => ON, // ON to put enabled the module
-                       "files" => ["Core/google/vendor/autoload.php"], // Which files we require to use it ?
+                       "files" => ["Core/google/vendor/autoload.php","Core/Facebook/autoload.php","Core/twitter/autoload.php"], // Which files we require to use it ?
                        "controllers" => "",
                        "modules" => []]; // Which others modules are require to use this one  
     /**

@@ -28,5 +28,5 @@
     define("MONTH_12", "Décembre");
     define("ERROR_CREATE_BRAND", "Impossible de créer une marque");
     define("ERROR_CREATE_TAG", "Impossible de créer un tag");
-    define("WRONG_HAPPENS", "Une erreur est surevenue.");
+    define("WRONG_HAPPENS", "Une erreur est survenue.");
     
