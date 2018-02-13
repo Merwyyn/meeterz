@@ -29,20 +29,32 @@
             }
         }
         protected function google(){
-            $google_id=NULL;
-            $client = new Google_Client();
-            $client->setApplicationName("Backend_Meeterz");
-            $client->setDeveloperKey("SERVER_KEY");
-            $client->authenticate(filter_input(INPUT_POST, "code"));
-            $access_token = $client->getAccessToken();
-            $ticket = $client->verifyIdToken($access_token);
-            if ($ticket) {
-              $data = $ticket->getAttributes();
-              $google_id=$data['payload']['sub']; // user ID
+            global $base_web;
+            $postdata = file_get_contents("php://input");
+            $request = json_decode($postdata);
+            if (!isset($request->code))
+            {
+                return ["error" => WRONG_HAPPENS];
             }
-            return $this->loginNetworks("google", $google_id);
+            $client = new Google_Client();
+            $client->setAuthConfigFile($base_web.'Core/google/client_secrets.json');
+            $client->setIncludeGrantedScopes(true);
+            $client->setAccessToken($client->fetchAccessTokenWithAuthCode($request->code));
+            if (!$client->getAccessToken())
+            {
+                return ["error" => WRONG_HAPPENS];
+            }
+            if (!($ticket = $client->verifyIdToken()))
+            {
+                return ["error" => WRONG_HAPPENS];
+            }
+            $email=$ticket["email"];
+            $last_name=$ticket["family_name"];
+            $first_name=$ticket["given_name"];
+            $google_id=$ticket["sub"];
+            return $this->loginNetworks("google", $google_id, ["email" => $email, "lastName" => $last_name, "firstName" => $first_name]);
         }
-        protected function loginNetworks($network, $code){
+        protected function loginNetworks($network, $code, $data=[]){
             $this->hadToBeAuth(false);
             global $jwtKey;
             try{
@@ -50,7 +62,16 @@
                 $result=$account->canLoginNetwork($network, $code);
                 if ($result<0)
                 {
-                    $account->createFrom($network, $code);
+                    $result=$account->createFrom($network, $code);
+                    if ($result<0)
+                    {
+                        throw new Exception($result);
+                    }
+                    $account=new Account($result);
+                    $account->updateFromData($data);
+                    if (!empty($data)){ 
+                        $account->save();
+                    }
                     return $this->loginNetworks($network, $code);
                 }
                 $account->updateLogin($result);

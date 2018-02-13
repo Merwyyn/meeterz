@@ -30,7 +30,7 @@
         const EXIST_LOGIN_NETWORK = 'SELECT id FROM user WHERE %NETWORK%=?';
         const EXIST_MAIL = 'SELECT COUNT(*) FROM user WHERE email=?';
         const INSERT = 'INSERT INTO user (email, password, registrationDate) VALUES (?, ?, ?)';
-        const INSERT_NETWORKS = 'INSERT INTO user (email, password, %NETWORK%, registrationDate) VALUES (NULL, NULL, ?, ?)';
+        const INSERT_NETWORKS = 'INSERT INTO user (email, password, %NETWORK%, registrationDate) VALUES ("", "", ?, ?)';
         const UPDATE_LOGIN = 'UPDATE user SET loginTime=? WHERE id=?';
         const UPDATE_LOGOUT = 'UPDATE user SET logoutTime=? WHERE id=?';
         const UPDATE = 'UPDATE user SET lastName=?, firstName=?, access_level=?, birthDate=?, nationality=?, email=?, password=?, address=?, city=?, postalCode=?, country=?, cellNumber=?, facebook=?, instagram=?, twitter=?, google=?, howDoYouKnow=?, occupation=?, children=?, picture=?, registrationDate=?, loginTime=?, logoutTime=? WHERE id=?';
@@ -43,6 +43,18 @@
             else
             {
                 $this->loadFromInfo($idUser, $lastName, $firstName, $access_level, $birthDate, $nationality, $email, $password, $address, $city, $postalCode, $country, $cellNumber, $facebook, $instagram, $twitter, $google, $howDoYouKnow, $occupation, $children, $picture, $registrationDate, $loginTime, $logoutTime);
+            }
+        }
+        public function updateFromData($data){
+            if (!is_array($data))
+            {
+                return;
+            }
+            foreach ($data as $key => $value){
+                $method="set".ucfirst($key);
+                if (method_exists($this, $method)){
+                    $this->$method ($value);
+                }
             }
         }
         public function save(){
@@ -102,10 +114,14 @@
             }
         }
         public function createFrom($network, $code){
+            global $debug;
             try{
                 $this->execute(__(self::INSERT_NETWORKS, $network), [$code, time()]);
                 return $this->lastInsert();
             } catch (Exception $ex) {
+                if ($debug){
+                    print_r($ex);
+                }
                 return -1;
             }
         }
@@ -287,7 +303,7 @@
         }
 
         public function setEmail($email) {
-            if (isEmail($email)){
+            if (isEmail($email) && !$this->existByMail($email)){
                 $this->_email = $email;
             }
         }
