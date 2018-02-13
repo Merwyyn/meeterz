@@ -125,5 +125,23 @@
             $results["meetstoday"]=count($results["meets"]);
             return $results;
         }
+        protected function update(){
+            $this->hadToBeAuth(true);
+            $token = getToken();
+            $upload = new Upload($_FILES, PICTURES, getToken()->id."/user");
+            $user=new Account($token->id);
+            foreach ($_POST as $key => $value)
+            {
+                $method="set".ucfirst($key);
+                if (method_exists($user, $method) && !empty($value))
+                {
+                    $user->$method ($value);
+                }
+            }
+            if ($upload->getCount()>0){
+                $user->setPicture($upload->getPath());
+            }
+            return $user->save();
+        }
     }
     

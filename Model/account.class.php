@@ -33,6 +33,7 @@
         const INSERT_NETWORKS = 'INSERT INTO user (email, password, %NETWORK%, registrationDate) VALUES (NULL, NULL, ?, ?)';
         const UPDATE_LOGIN = 'UPDATE user SET loginTime=? WHERE id=?';
         const UPDATE_LOGOUT = 'UPDATE user SET logoutTime=? WHERE id=?';
+        const UPDATE = 'UPDATE user SET lastName=?, firstName=?, access_level=?, birthDate=?, nationality=?, email=?, password=?, address=?, city=?, postalCode=?, country=?, cellNumber=?, facebook=?, instagram=?, twitter=?, google=?, howDoYouKnow=?, occupation=?, children=?, picture=?, registrationDate=?, loginTime=?, logoutTime=? WHERE id=?';
         public function __construct($idUser=NULL, $lastName=NULL, $firstName=NULL, $access_level=NULL, $birthDate=NULL, $nationality=NULL, $email=NULL, $password=NULL, $address=NULL, $city=NULL, $postalCode=NULL, $country=NULL, $cellNumber=NULL, $facebook=NULL, $instagram=NULL, $twitter=NULL, $google=NULL, $howDoYouKnow=NULL, $occupation=NULL, $children=NULL, $picture=NULL, $registrationDate = NULL, $loginTime = NULL, $logoutTime = NULL){
             parent::__construct();
             if (func_num_args()==1)
@@ -42,6 +43,14 @@
             else
             {
                 $this->loadFromInfo($idUser, $lastName, $firstName, $access_level, $birthDate, $nationality, $email, $password, $address, $city, $postalCode, $country, $cellNumber, $facebook, $instagram, $twitter, $google, $howDoYouKnow, $occupation, $children, $picture, $registrationDate, $loginTime, $logoutTime);
+            }
+        }
+        public function save(){
+            try{
+                $this->execute(self::UPDATE, [$this->_lastName, $this->_firstName, $this->_access_level, $this->_birthDate, $this->_nationality, $this->_email, $this->_password, $this->_address, $this->_city, $this->_postalCode, $this->_country, $this->_cellNumber, $this->_facebook, $this->_instagram, $this->_twitter, $this->_google, $this->_howDoYouKnow, $this->_occupation, $this->_children, $this->_picture, $this->_registrationDate, $this->_loginTime, $this->_logoutTime, $this->_id]);
+                return ["success" => true];
+            } catch (Exception $ex) {
+                return ["error" => WRONG_HAPPENS];
             }
         }
         public function toData(){
@@ -278,7 +287,9 @@
         }
 
         public function setEmail($email) {
-            $this->_email = $email;
+            if (isEmail($email)){
+                $this->_email = $email;
+            }
         }
 
         public function setAddress($address) {
@@ -322,7 +333,11 @@
         }
 
         public function setOccupation($occupation) {
-            $this->_occupation = $occupation;
+            global $occupations;
+            if (isset($occupations[$occupation]))
+            {
+                $this->_occupation = $occupation;
+            }   
         }
 
         public function setChildren($children) {

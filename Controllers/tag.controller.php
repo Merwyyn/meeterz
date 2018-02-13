@@ -17,7 +17,7 @@
                 {
                     throw new Exception(ERROR_CREATE_TAG);
                 }
-                $icon=$upload->getPath();
+                $icon=$upload->getListPath();
                 $tag=new Tag($id, $icon, $description, $name);
                 return $tag->save();
             } catch (Exception $ex) {

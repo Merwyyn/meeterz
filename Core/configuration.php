@@ -19,6 +19,16 @@
     /** 
         YOU CAN EDIT NOW
     **/
+    $occupations=["Non défini",
+    "Artisan, commerçant, chef d'entreprise de moins de 10 salariés",
+    "Cadre supérieur, chef d'entreprise de plus de 10 salariés ",
+    "Profession libérale",
+    "Profession intermédiaire (cadre moyen/technicien)",
+    "Employé",
+    "Ouvrier",
+    "Etudiant",
+    "Lycéen, collégien",
+    "Autre"];
     $networks=["facebook","twitter","googlePlus","instagram"];
     $database_config=["host" => 'localhost', "user" => 'dr166627', "password" => 'bTrm5&45', "database" => 'meeterz_dev2'];
     $debug=ON;

@@ -17,7 +17,7 @@
                 {
                     throw new Exception(ERROR_CREATE_BRAND);
                 }
-                $logo=$upload->getPath();
+                $logo=$upload->getListPath();
                 $brand=new Brand($id, $name, $url, $logo);
                 return $brand->save();
             } catch (Exception $ex) {

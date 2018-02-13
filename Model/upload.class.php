@@ -89,4 +89,21 @@ class Upload extends ErrorType{
     {
         return $this->_paths;
     }
+    public function getListPath()
+    {
+        $result="";
+        foreach ($this->_paths as $path){
+            if (file_exists($path))
+            {
+                if ($result!=""){
+                    $result.=",";
+                }
+                $result.=$path;
+            }
+        }
+        return $result;
+    }
+    public function getCount(){
+        return count($this->_paths);
+    }
 }
