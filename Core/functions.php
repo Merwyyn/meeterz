@@ -1,4 +1,34 @@
 <?php
+    function getLatLong($address)
+    {
+        global $googleKey;
+        $prepAddr = str_replace(' ','+',$address);
+        $geocode=file_get_contents('https://maps.googleapis.com/maps/api/geocode/json?address='.$prepAddr.'&sensor=false&key='.$googleKey);
+        $output= json_decode($geocode);
+        if (isset($output->status) && $output->status=="ZERO_RESULTS")
+        {
+            return -1;
+        }
+        if (!isset($output->results[0])){
+            return -1;
+        }
+        $latitude = $output->results[0]->geometry->location->lat;
+        $longitude = $output->results[0]->geometry->location->lng;
+        return [$latitude, $longitude];
+    }
+    function calculDistance($lat1, $long1, $lat2, $long2)
+    {
+        $R = 6371e3; // metres
+        $a1 = deg2rad($lat1);
+        $a2 = deg2rad($lat2);
+        $b1 = deg2rad($lat2-$lat1);
+        $b2 = deg2rad($long2-$long1);
+        $a = sin($b1/2) * sin($b1/2) +
+                cos($a1) * cos($a2) *
+                sin($b2/2) * sin($b2/2);
+        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
+        return $R*$c;
+    }
     function getMonthString($i){
         return constant("MONTH_".$i);
     }

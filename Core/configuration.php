@@ -2,7 +2,6 @@
     /**
         DO NOT TOUCH THE NEXT LINES
     **/
-    ini_set("session.cookie_domain", ".meeterz.waapi.fr");
     define( 'ROOT_DIR', dirname(__FILE__) );
     define("ON", true);
     define("OFF", false);
@@ -11,7 +10,8 @@
                        "Core/jwtToken.php",
                        "Controllers/controller.php",
                        "Model/error.class.php",
-                       "Model/modele.class.php"];
+                       "Model/modele.class.php",
+                       "Model/upload.class.php"];
     $modules=[];
     $prefix_hash="E48#Idxn";
     $jwtKey="EmpkNz87Afamp";
@@ -19,6 +19,7 @@
     /** 
         YOU CAN EDIT NOW
     **/
+    $googleKey="AIzaSyB1bUthQ7GRamNPVJuw7Cvf9xMJKZWoKko";
     $occupations=["Non défini",
     "Artisan, commerçant, chef d'entreprise de moins de 10 salariés",
     "Cadre supérieur, chef d'entreprise de plus de 10 salariés ",
@@ -29,7 +30,6 @@
     "Etudiant",
     "Lycéen, collégien",
     "Autre"];
-    $networks=["facebook","twitter","googlePlus","instagram"];
     $database_config=["host" => 'localhost', "user" => 'dr166627', "password" => 'bTrm5&45', "database" => 'meeterz_dev2'];
     $debug=ON;
     $base_web=ROOT_DIR."/../";
@@ -79,7 +79,8 @@
         DO NOT TOUCH THE NEXT LINES
     **/
     define("DEFAULT_LANGUE", $lang_available[0]);
-    define("DEFAULT_LANGUE_ETRANGER", $lang_available[max(0, count($lang_available)-1)]);						
+    define("DEFAULT_LANGUE_ETRANGER", $lang_available[max(0, count($lang_available)-1)]);	
+    session_start();
     if ($debug){
         ini_set('display_errors','on');
         error_reporting(E_ALL);

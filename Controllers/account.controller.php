@@ -32,16 +32,33 @@
             }
         }
         protected function twitter(){
-            $twitteroauth = new TwitterOAuth("wJ7nzXpgofAl700CP3QWr0xmr", "hAWHwuDSyF4tYANKdSuxBt3bC1ErUBi7G4qUh1zO2L8Z0AGD4x");
-            $request_token = $twitteroauth->oauth(
-                'oauth/request_token', [
-                    'oauth_callback' => "https://meeterz.waapi.fr"
-                ]
+            $postdata = file_get_contents("php://input");
+            $request = json_decode($postdata);
+            $twitteroauth = new Abraham\TwitterOAuth\TwitterOAuth("Nd3omgs4Wptkxk22nkSwciuNa", "CAYrhhchrPPXxTPWhSAzJXjunjKg9HWty5qN5RgWhL8WaXJO6Z");
+            if (!isset($request->oauth_verifier))
+            {
+                $request_token = $twitteroauth->oauth(
+                    'oauth/request_token', []
+                );
+                if($twitteroauth->getLastHttpCode() != 200) {
+                    return ["error" => WRONG_HAPPENS];
+                }
+                return ["oauth_token" => $request_token['oauth_token']];
+            }
+            $access_token = $twitteroauth->oauth("oauth/access_token", ["oauth_verifier" => $request->oauth_verifier, 'oauth_token'=> $request->oauth_token]);
+            $connection = new Abraham\TwitterOAuth\TwitterOAuth(
+                "Nd3omgs4Wptkxk22nkSwciuNa",
+                "CAYrhhchrPPXxTPWhSAzJXjunjKg9HWty5qN5RgWhL8WaXJO6Z",
+                $access_token['oauth_token'],
+                $access_token['oauth_token_secret']
             );
-            if($twitteroauth->getLastHttpCode() != 200) {
+            $response=$connection->get("account/verify_credentials");
+            if (empty($response))
+            {
                 return ["error" => WRONG_HAPPENS];
             }
-            return ["oauth_token" => $request_token['oauth_token']];
+            $tmp=explode(" ", $response->name);
+            return $this->loginNetworks("twitter", $response->id, ["picture" => $response->profile_image_url_https, "lastName" => $tmp[count($tmp)-1], "firstName" => $tmp[0]]);
         }
         protected function instagram(){
             $postdata = file_get_contents("php://input");
@@ -159,7 +176,7 @@
                     return $this->loginNetworks($network, $code);
                 }
                 $account->updateLogin($result);
-                $time=time()+3600;
+                $time=time()+3600*24*30;
                 $token=JWT::encode([
                     'id' => $result,
                     'exp' => $time], $jwtKey);
@@ -238,7 +255,7 @@
             foreach ($_POST as $key => $value)
             {
                 $method="set".ucfirst($key);
-                if (method_exists($user, $method) && !empty($value))
+                if (method_exists($user, $method) && (!empty($value) || $value==0) && $key!="picture")
                 {
                     $user->$method ($value);
                 }

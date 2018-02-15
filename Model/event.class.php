@@ -27,7 +27,7 @@
                 . 'GROUP BY (id) '
                 . 'HAVING registered<placesLimitMin '
                 . 'ORDER BY dateLimit ASC LIMIT %COUNT%';
-        const SELECT_BY_ID = 'SELECT e.idTalent, id, city, name, dateLimit, picture, description, placesLimitMin, COUNT(id) AS registered FROM event e '
+        const SELECT_BY_ID = 'SELECT e.idTalent, id, city, name, dateLimit, picture, description, placesLimitMin, e.date, e.country, COUNT(id) AS registered FROM event e '
                 . 'LEFT OUTER JOIN registration r ON e.id=r.idEvent '
                 . 'WHERE dateLimit>? AND openingDate<? AND (r.validity=1 OR e.id NOT IN '
                 . '(SELECT R2.idEvent FROM registration R2 WHERE R2.idEvent=e.id AND R2.validity=1)) AND id IN (%LISTE_ID%) '
@@ -140,7 +140,31 @@
             return $this->execute(self::COUNT_NEXT_MEETS, [time()])->fetchColumn();
         }
         public function getDataForm(){
-            return ["city" => $this->query(self::SELECT_CITIES)->fetchAll(), "domain" => $this->query(self::SELECT_DOMAIN)->fetchAll(), "talent" => $this->query(self::SELECT_TALENT)->fetchAll()];
+            $tmp=$this->query(self::SELECT_CITIES)->fetchAll();
+            $city=[];
+            for ($i=0;$i<count($tmp);$i++){
+                if (!$i%4){
+                    $city[]=[];
+                }
+                $city[floor($i/4)][]=$tmp[$i];
+            }
+            $tmp=$this->query(self::SELECT_DOMAIN)->fetchAll();
+            $domain=[];
+            for ($i=0;$i<count($tmp);$i++){
+                if (!$i%4){
+                    $domain[]=[];
+                }
+                $domain[floor($i/4)][]=$tmp[$i];
+            }
+            $tmp=$this->query(self::SELECT_TALENT)->fetchAll();
+            $talent=[];
+            for ($i=0;$i<count($tmp);$i++){
+                if (!$i%4){
+                    $talent[]=[];
+                }
+                $talent[floor($i/4)][]=$tmp[$i];
+            }
+            return ["city" => $city, "domain" => $domain, "talent" => $talent];
         }
         public function getMeetsById($ids){
             global $debug;

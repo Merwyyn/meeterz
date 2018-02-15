@@ -14,7 +14,7 @@
                 . 'WHERE idUser IN '
                     . '(SELECT idUser FROM registration '
                     . 'LEFT JOIN event ON idEvent=id '
-                    . 'WHERE idEvent IN (%LISTE_ID%) AND idUser!=? AND validity=1 AND dateLimit>? AND openingDate<? '
+                    . 'WHERE idEvent IN (%LISTE_ID%) AND idUser!=? AND validity=1 AND dateLimit>? AND openingDate>? '
                     . 'GROUP BY (idUser)) '
                 . 'AND idEvent NOT IN (%LISTE_ID2%) GROUP BY (idEvent) '
                 . 'ORDER BY c DESC LIMIT 6';
@@ -65,7 +65,12 @@
                 }
                 if (empty($idsEvent))
                 {
-                    return [];
+                    $event=new Event();
+                    $tmp=$event->getEventByUserId($idUser, 6);
+                    foreach ($tmp as $e){
+                        $idsEvent[]=$e["id"];
+                    }
+                    return $idsEvent;
                 }
                 $data=[];
                 $req2=$this->execute(__(self::SELECT_ID_RECOMMENDED, implode(",", $idsEvent), implode(",", $idsEvent)), [$idUser, time(), time()]);

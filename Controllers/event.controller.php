@@ -73,9 +73,27 @@
             $affinityController = new AffinityController();
             $this->hadToBeAuth(true);
             $search = filter_input(INPUT_POST, "search");
-            $city_form = json_decode(filter_input(INPUT_POST, "city"), true);
-            $domain_form = json_decode(filter_input(INPUT_POST, "domain"), true);
-            $talent_form = json_decode(filter_input(INPUT_POST, "talent"), true);
+            $city_form = filter_input(INPUT_POST, "city", FILTER_DEFAULT , FILTER_REQUIRE_ARRAY);
+            $domain_form = filter_input(INPUT_POST, "domain", FILTER_DEFAULT , FILTER_REQUIRE_ARRAY);
+            $talent_form = filter_input(INPUT_POST, "talent", FILTER_DEFAULT , FILTER_REQUIRE_ARRAY);
+            $range_form = filter_input(INPUT_POST, "range");
+            $lat = filter_input(INPUT_POST, "lat");
+            $long = filter_input(INPUT_POST, "long");
+            $date_form = filter_input(INPUT_POST, "date");
+            if (!empty($date_form)){
+                switch ($date_form){
+                    case 1:
+                    case 3:
+                    case 6:
+                    case 12:
+                        $m=date("m")+$date_form;
+                        $Y=date("Y");
+                        if ($m>12){ $m-=12; $Y++; }
+                        $time_form=strtotime("01-".$m."-".$Y)-1;
+                        break;
+                    default:break;
+                }
+            }
             if (!empty($talent_form)){
                 foreach ($talent_form as $talent_id){
                     $affinityController->searched($talent_id);
@@ -104,6 +122,18 @@
                     {
                         continue;
                     }
+                    if (isset($time_form) && $time_form<$results_tmp[$k]["date"])
+                    {
+                        continue;
+                    }
+                    if (!empty($range_form) && !empty($lat) && !empty($long))
+                    {
+                        if (!is_array($LatLong=getLatLong($results_tmp[$k]["city"]." ".$results_tmp[$k]["country"])) ||
+                        calculDistance($LatLong[0], $LatLong[1], $lat, $long)>$range_form*1000)
+                        {
+                            continue;
+                        }
+                    }
                     $results_tmp[$k]["type"]="meet";
                     if (!empty($search) && (strstr($results_tmp[$k]["city"], $search) || strstr($results_tmp[$k]["name"], $search)))
                     {
@@ -122,7 +152,7 @@
                     }
                 }
             }
-            if (count($data)<4)
+            if (count($data)<6)
             {
                 array_unshift($results, ["type" => "whatsapp"]);
                 while (count($results)<6)

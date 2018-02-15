@@ -83,7 +83,7 @@
                     "google" => $this->_google,
                     "howDoYouKnow" => $this->_howDoYouKnow,
                     "occupation" => $this->_occupation,
-                    "children" => $this->_children,
+                    "children" => (int)$this->_children,
                     "picture" => $this->_picture,
                     "registrationDate" => $this->_registrationDate];
         }
@@ -291,6 +291,15 @@
         }
 
         public function setAccessLevel($admin) {
+            if (!isAuth())
+            {
+                return;
+            }
+            $user = new Account(getToken()->id);
+            if ($user->getAccessLevel()<$admin)
+            {
+                return;
+            }
             $this->_access_level = $admin;
         }
 
